@@ -48,11 +48,20 @@ pr compdta
 	mata: compattribs(st_local("dta1"), st_local("dta2"))
 end
 
+vers 10.1
+
 loc RS	real scalar
+loc RR	real rowvector
 loc RC	real colvector
+loc RM	real matrix
 loc SS	string scalar
 loc SR	string rowvector
 loc SC	string colvector
+loc SM	string matrix
+loc TS	transmorphic scalar
+loc TR	transmorphic rowvector
+loc TC	transmorphic colvector
+loc TM	transmorphic matrix
 
 loc Vallab		vallab
 loc VallabR		struct `Vallab' rowvector
@@ -71,7 +80,6 @@ loc AttribsS	struct `Attribs' scalar
 loc AttribsR	struct `Attribs' rowvector
 
 mata:
-mata set matastrict on
 
 struct `Vallab' {
 	`SS' name
