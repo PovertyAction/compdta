@@ -1,5 +1,3 @@
-* Compares the data and metadata of two Stata datasets, resulting in an error if
-* they are not the same.
 pr compdta
 	vers 9
 

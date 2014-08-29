@@ -1,4 +1,4 @@
 compdta
 =======
 
-Stata -compdta- program to assert identity of datasets
+`compdta` compares the data and metadata of two Stata datasets, resulting in an error if they are not the same.
