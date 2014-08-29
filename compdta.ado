@@ -98,8 +98,8 @@ struct `VarAttribs' {
 }
 
 struct `Attribs' {
-	`dtaAttribsS'	dta
-	`VarAttribsR'	vars
+	`dtaAttribsS' dta
+	`VarAttribsR' vars
 }
 
 `AttribsS' function getattribs(`SS' _dta)
