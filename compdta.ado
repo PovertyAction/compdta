@@ -2,11 +2,22 @@ pr compdta
 	vers 10.1
 
 	* Parse the command line.
-	syntax anything(name=dtas id=datasets)
+	syntax anything(name=dtas id=datasets), [Char(str asis)]
 	gettoken dta1 dtas : dtas
 	gettoken dta2 dtas : dtas
 	if `:length loc dtas' ///
 		err 198
+
+	* Parse -char()-.
+	if `:length loc char' {
+		loc 0 ", `char'"
+		cap noi syntax, drop(str)
+		if _rc {
+			di as err "option char() invalid"
+			ex _rc
+		}
+		loc char_drop "`drop'"
+	}
 
 	preserve
 
@@ -45,7 +56,7 @@ pr compdta
 	cf _all using `"`dta2'"'
 
 	* Check variable and dataset attributes.
-	mata: compattribs(st_local("dta1"), st_local("dta2"))
+	mata: compattribs("dta1", "dta2", "char_drop")
 end
 
 vers 10.1
@@ -62,6 +73,13 @@ loc TS	transmorphic scalar
 loc TR	transmorphic rowvector
 loc TC	transmorphic colvector
 loc TM	transmorphic matrix
+
+* A local macro name
+loc lclname		`SS'
+
+loc boolean		`RS'
+loc True		1
+loc False		0
 
 loc Vallab		vallab
 loc VallabR		struct `Vallab' rowvector
@@ -108,14 +126,14 @@ struct `Attribs' {
 	`VarAttribsR' vars
 }
 
-`AttribsS' function getattribs(`SS' _dta)
+`AttribsS' function getattribs(`SS' dta, `SS' char_drop)
 {
 	`RS' n, nchars, i, j
 	`RC' values
 	`SC' charnames, vallabs, text
 	`AttribsS' attribs
 
-	stata(sprintf(`"qui u `"%s"', clear"', _dta))
+	stata(sprintf(`"qui u `"%s"', clear"', dta))
 
 	// Dataset label
 	stata("loc lab : data lab")
@@ -157,6 +175,8 @@ struct `Attribs' {
 
 		// Characteristics
 		charnames = sort(st_dir("char", attribs.vars[i].name, "*"), 1)
+		if (length(charnames))
+			charnames = select(charnames, !regexm(charnames, char_drop))
 		nchars = length(charnames)
 		attribs.vars[i].chars = `Char'(nchars)
 		for (j = 1; j <= nchars; j++) {
@@ -169,15 +189,17 @@ struct `Attribs' {
 	return(attribs)
 }
 
-void function compattribs(`SS' _dta1, _dta2)
+void function compattribs(`lclname' _dta1, `lclname' _dta2,
+	`lclname' _char_drop)
 {
 	`RS' n, i
-	`SS' var
+	`SS' char_drop, var
 	`AttribsR' attribs
 
 	attribs = `Attribs'(2)
-	attribs[1] = getattribs(_dta1)
-	attribs[2] = getattribs(_dta2)
+	char_drop = st_local(_char_drop)
+	attribs[1] = getattribs(st_local(_dta1), char_drop)
+	attribs[2] = getattribs(st_local(_dta2), char_drop)
 
 	// Dataset attributes
 
