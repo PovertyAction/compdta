@@ -8,6 +8,8 @@ pr compdta
 	if `:length loc dtas' ///
 		err 198
 
+	preserve
+
 	* If only one dataset is specified, compare it to the dataset in memory.
 	if !`:length loc dta2' {
 		loc dta2 : copy loc dta1
@@ -36,8 +38,6 @@ pr compdta
 		di as err "sortlists (sort orders of datasets) differ"
 		ex 9
 	}
-
-	preserve
 
 	qui u `"`dta1'"', clear
 
