@@ -1,7 +1,7 @@
 pr compdta
 	vers 10.1
 
-	* Parse command line.
+	* Parse the command line.
 	syntax anything(name=dtas id=datasets)
 	gettoken dta1 dtas : dtas
 	gettoken dta2 dtas : dtas
