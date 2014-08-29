@@ -48,6 +48,8 @@ pr compdta
 	mata: compattribs(st_local("dta1"), st_local("dta2"))
 end
 
+vers 10.1
+
 loc RS	real scalar
 loc RC	real colvector
 loc SS	string scalar
