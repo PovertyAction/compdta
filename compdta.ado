@@ -33,7 +33,7 @@ pr compdta
 		/*NOTREACHED*/
 	}
 	if !`:list sort1 == sort2' {
-		di as err "sort variables differ"
+		di as err "sortlists (sort orders of datasets) differ"
 		ex 9
 	}
 
