@@ -2,11 +2,22 @@ pr compdta
 	vers 10.1
 
 	* Parse the command line.
-	syntax anything(name=dtas id=datasets), [Char(str asis)]
+	syntax anything(name=dtas id=datasets), [Format(str asis) Char(str asis)]
 	gettoken dta1 dtas : dtas
 	gettoken dta2 dtas : dtas
 	if `:length loc dtas' ///
 		err 198
+
+	* Parse -format()-.
+	if `:length loc format' {
+		loc 0 ", `format'"
+		cap noi syntax, NOT
+		if _rc {
+			di as err "option format() invalid"
+			ex _rc
+		}
+		loc format_not "`not'"
+	}
 
 	* Parse -char()-.
 	if `:length loc char' {
@@ -56,7 +67,7 @@ pr compdta
 	cf _all using `"`dta2'"'
 
 	* Check variable and dataset attributes.
-	mata: compattribs("dta1", "dta2", "char_drop")
+	mata: compattribs("dta1", "dta2", "`format_not'" != "", "char_drop")
 end
 
 vers 10.1
@@ -190,7 +201,7 @@ struct `Attribs' {
 }
 
 void function compattribs(`lclname' _dta1, `lclname' _dta2,
-	`lclname' _char_drop)
+	`boolean' _format_not, `lclname' _char_drop)
 {
 	`RS' n, i
 	`SS' char_drop, var
@@ -255,9 +266,11 @@ void function compattribs(`lclname' _dta1, `lclname' _dta2,
 		}
 
 		// Display format
-		if (attribs[1].vars[i].format != attribs[2].vars[i].format) {
-			errprintf("display formats differ for variable %s\n", var)
-			exit(9)
+		if (!_format_not) {
+			if (attribs[1].vars[i].format != attribs[2].vars[i].format) {
+				errprintf("display formats differ for variable %s\n", var)
+				exit(9)
+			}
 		}
 
 		// Value label name
