@@ -55,7 +55,6 @@ loc SR	string rowvector
 loc SC	string colvector
 
 loc Vallab		vallab
-loc VallabS		struct `Vallab' scalar
 loc VallabR		struct `Vallab' rowvector
 
 loc Char	evar_char
@@ -92,8 +91,7 @@ struct `dtaAttribs' {
 
 struct `VarAttribs' {
 	`RS'		index
-	`SS'		name, type, format, varlab
-	`VallabS'	vallab
+	`SS'		name, type, format, vallab, varlab
 	`CharR'		chars
 }
 
@@ -124,7 +122,7 @@ struct `Attribs' {
 		attribs.dta.chars[i].text = st_global(sprintf("_dta[%s]", charnames[i]))
 	}
 
-	// All value labels in the dataset
+	// Value labels
 	stata("qui lab dir")
 	vallabs = sort(tokens(st_global("r(names)"))', 1)
 	n = length(vallabs)
@@ -146,17 +144,8 @@ struct `Attribs' {
 		attribs.vars[i].name   = st_varname(i)
 		attribs.vars[i].type   = st_vartype(i)
 		attribs.vars[i].format = st_varformat(i)
+		attribs.vars[i].vallab = st_varvaluelabel(i)
 		attribs.vars[i].varlab = st_varlabel(i)
-
-		// Value label
-		attribs.vars[i].vallab.name = st_varvaluelabel(i)
-		if (attribs.vars[i].vallab.name != "") {
-			pragma unset values
-			pragma unset text
-			st_vlload(attribs.vars[i].vallab.name, values, text)
-			attribs.vars[i].vallab.values = values
-			attribs.vars[i].vallab.text   = text
-		}
 
 		// Characteristics
 		charnames = sort(st_dir("char", attribs.vars[i].name, "*"), 1)
@@ -182,6 +171,8 @@ void function compattribs(`SS' _dta1, _dta2)
 	attribs[1] = getattribs(_dta1)
 	attribs[2] = getattribs(_dta2)
 
+	// Dataset attributes
+
 	// Dataset label
 	if (attribs[1].dta.label != attribs[2].dta.label) {
 		errprintf("dataset labels differ\n")
@@ -192,6 +183,19 @@ void function compattribs(`SS' _dta1, _dta2)
 	if (attribs[1].dta.chars != attribs[2].dta.chars) {
 		errprintf("dataset characteristics differ\n")
 		exit(9)
+	}
+
+	// Value labels
+	if (length(attribs[1].dta.vallabs) != length(attribs[2].dta.vallabs)) {
+		errprintf("number of value labels differs\n")
+		exit(9)
+	}
+	n = length(attribs[1].dta.vallabs)
+	for (i = 1; i <= n; i++) {
+		if (attribs[1].dta.vallabs[i] != attribs[2].dta.vallabs[i]) {
+			errprintf("value labels differ\n")
+			exit(9)
+		}
 	}
 
 	// Variable attributes
@@ -226,7 +230,7 @@ void function compattribs(`SS' _dta1, _dta2)
 			exit(9)
 		}
 
-		// Value label
+		// Value label name
 		if (attribs[1].vars[i].vallab != attribs[2].vars[i].vallab) {
 			errprintf("value labels differ for variable %s\n", var)
 			exit(9)
@@ -241,19 +245,6 @@ void function compattribs(`SS' _dta1, _dta2)
 		// Characteristics
 		if (attribs[1].vars[i].chars != attribs[2].vars[i].chars) {
 			errprintf("characteristics differ for variable %s\n", var)
-			exit(9)
-		}
-	}
-
-	// All value labels
-	if (length(attribs[1].dta.vallabs) != length(attribs[2].dta.vallabs)) {
-		errprintf("number of value labels differs\n")
-		exit(9)
-	}
-	n = length(attribs[1].dta.vallabs)
-	for (i = 1; i <= n; i++) {
-		if (attribs[1].dta.vallabs[i] != attribs[2].dta.vallabs[i]) {
-			errprintf("value labels differ\n")
 			exit(9)
 		}
 	}
