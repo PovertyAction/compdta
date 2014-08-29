@@ -81,7 +81,6 @@ loc AttribsS	struct `Attribs' scalar
 loc AttribsR	struct `Attribs' rowvector
 
 mata:
-mata set matastrict on
 
 struct `Vallab' {
 	`SS' name
