@@ -152,6 +152,8 @@ struct `Attribs' {
 
 	// Dataset characteristics
 	charnames = sort(st_dir("char", "_dta", "*"), 1)
+	if (length(charnames))
+		charnames = select(charnames, !regexm(charnames, char_drop))
 	n = length(charnames)
 	attribs.dta.chars = `Char'(n)
 	for (i = 1; i <= n; i++) {
